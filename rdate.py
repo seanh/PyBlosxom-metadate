@@ -11,9 +11,9 @@ The format of the tag is:
 If rdate does not find a #published metadata tag inside a file it
 inserts one using the mtime of the file.
 
-If it does find a tag it checks to see if the mtime of the file matches
-the time in the tag, and if not it restores the mtime of the file from
-the tag.
+If it does find a tag and you passed the --reset-mtimes then it checks to see if
+the mtime of the file matches the time in the tag, and if not it resets the
+mtime of the file from the tag.
 
 A list of file or directory names should be given as command-line
 argument.
@@ -29,6 +29,8 @@ The following options are available:
                     
     -d : do a dry-run, do not change the mtimes or contents of any files,
          but report on any that need to be changed.
+
+    -R : reset the mtimes of files to those stored in their metadata lines
 
     FIXME: currently if you pass a non-.txt filename as an argument you
            also have to give the -e extension, or rdate will ignore the
@@ -58,10 +60,11 @@ Copyright 2007 David Zejda  (original version)
 Copyright 2009 seanh (same idea, complete rewrite)
 
 """
-__author__ = "seanh"
-__version__ = "v 0.2 complete rewrite by seanh"
-__url__ = "http://github.com/seanh/PyBlosxom-rdate/"
-__description__ = "Remembers or restores the original mtime of an entry."
+__author__ = 'Sean Hammond'
+__homepage__ = 'http://github.com/seanh/PyBlosxom-rdate'
+__email__ = 'seanh.nospam@gmail.com'
+__version__ = "v 0.3 made resetting mtimes optional"
+__description__ = "Remembers or resets the original mtime of an entry."
 
 import os,datetime,time,sys,getopt
 
@@ -69,6 +72,7 @@ FMT = "#published %Y-%m-%d %H:%M:%S\n"
 ext = '.txt'
 verbose = False
 dryrun = False
+reset_mtimes = False
 
 def parsefile(filename):
     """Read in the contents of a pyblosxom story file, and parse them.
@@ -105,7 +109,7 @@ def parsefile(filename):
     return { "title": title, "metadata": metadata, "body": body }
 
 def savemtime(filename):
-    """Save the mtime of a file in a #published tag in the file, if no
+    """Save the mtime of a file in a #published tag in the file if no
        such tag already exists, otherwise do nothing."""
     
     # Get the current mtime of the file from the system.
@@ -140,7 +144,7 @@ def savemtime(filename):
     f.close()
     os.utime(filename,(atime, mtime))
 
-def restoremtime(filename):
+def reset_mtime(filename):
     """Set the mtime of the file to the time specified in the #published
     metadata in the file. If no such metadata exists, do nothing."""
 
@@ -155,14 +159,14 @@ def restoremtime(filename):
     if verbose: print "  mtime: ",fmtime.rstrip()
     for item in entry["metadata"]:
         if item.startswith("#published "):
-            if verbose: print "  Trying to restore remembered mtime."
+            if verbose: print "  Trying to reset remembered mtime."
             ttuple = time.strptime(item,FMT)
             if verbose: print "  parsed tuple:", ttuple
             epoch = time.mktime(ttuple)
             if verbose: print "  epoch seconds:", epoch
             if mtime != epoch:
                 if dryrun:
-                    print "mtime of", filename, "needs to be restored to", datetime.datetime.fromtimestamp(epoch).strftime(FMT).rstrip()
+                    print "mtime of", filename, "needs to be reset to", datetime.datetime.fromtimestamp(epoch).strftime(FMT).rstrip()
                 else:
                     print "  Restoring mtime of ",filename," to ",datetime.datetime.fromtimestamp(epoch).strftime(FMT).rstrip()
                     os.utime(filename,(atime,epoch))
@@ -176,7 +180,8 @@ def handle_file(filename):
     # FIXME - this is a terrible check for whether something might be
     # an entry file.  Need a better method.
     if filename.endswith(ext):
-        restoremtime(filename)
+        if reset_mtimes:
+            reset_mtime(filename)
         savemtime(filename)
     else:
         if verbose: print "skipping '%s' (not .txt)...." % filename
@@ -192,11 +197,11 @@ def handle_directory(d,recursive):
             handle_directory(fn,recursive)
     
 def usage():
-    print "Syntax: python rdate.py <-r> <-v> <-d> [file|dir] <file|dir...>"
+    print "Syntax: python rdate.py <-r> <-v> <-d> <-R> [file|dir] <file|dir...>"
     
 if __name__ == "__main__":
     try:
-        opts,args = getopt.getopt(sys.argv[1:],"rvde:",["recursive","verbose","dry-run","extension="])
+        opts,args = getopt.getopt(sys.argv[1:],"rvdRe:",["recursive","verbose","dry-run","reset-mtimes","extension="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -211,6 +216,8 @@ if __name__ == "__main__":
             ext = value
         if option in ("-d","--dry-run"):
             dryrun = True
+        if option in ("-R","--reset-mtimes"):
+            reset_mtimes = True
     for argument in args:
         if not (os.path.isdir(argument) or os.path.isfile(argument)):
             usage()

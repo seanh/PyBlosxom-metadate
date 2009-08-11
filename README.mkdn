@@ -1,17 +1,29 @@
-rdate script for pyblosxom
-==========================
+rdate plugin and script for pyblosxom
+=====================================
 
-Stores the mtimes of pyblosxom entries as `#published` tags in the entry 
-files, and restores the mtimes from these tags.
+`rdate-plugin.py` is a pyblosxom plugin that looks for metadata lines of the
+form `#published 2009-08-05 22:36:17` in your posts and uses these as the post
+dates instead of the file mtimes.
 
-There's a lot I'd like to add to this:
+`rdate.py` is a standalone utility that adds `#published` metadata lines to
+entries that don't already have them.
 
-*   A pyblosxom plugin that reads the `#published` tags instead of the mtimes,
-    then you wouldn't need to run rdate to restore the mtimes.
+Example of an entry with a `#published` line:
+
+    This is the title of my entry
+    #published 2009-08-05 22:36:17
+
+    This is the body of my entry.
+
+This needs a little refactoring, there is some code duplication between the two
+files. They should probably become one file.
+
+Some things I might like to add:
+
 *   Handle `#modified` as well as `#published tags` so that entries can 
     have separate published and modified times (not possible with 
     straight pyblosxom) and support ordering entries by either published 
     or modified times.
 *   Support for multiple date formats, including fancy formats like 
-    "Tuesday the 14th of July at 2:25PM", and support specifying the 
-    date format (strftime pattern) as a command-line argument.
+    "Tuesday the 14th of July at 2:25PM", and support user-specified date
+    formats (strftime pattern).
