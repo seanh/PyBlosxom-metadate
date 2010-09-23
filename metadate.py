@@ -39,7 +39,7 @@ Copyright 2009 seanh, based on the idea from David Zejda's rdate plugin.
 
 __author__ = 'Sean Hammond'
 __homepage__ = 'http://github.com/seanh/PyBlosxom-metadate'
-__email__ = 'seanh.nospam@gmail.com'
+__email__ = 'snhmnd@gmail.com'
 __version__ = "1"
 __description__ = "Read entry dates from pyblosxom metadata values instead of file mtimes."
 
