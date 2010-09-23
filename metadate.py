@@ -15,7 +15,7 @@ Example of an entry with a #published metadata value:
 This plugin can also be run as a command-line utility to add #published values
 to entry files that don't already have them, based on their mtimes. A list of
 file or directory names should be given as the command-line argument. See
-`./metadata.py --help` for command-line options.
+`./metadate.py --help` for command-line options.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
